@@ -257,8 +257,12 @@ function App() {
                 style={{ height: 40, width: "100%" }}
                 variant="outlined"
                 color="secondary"
+                onClick={() => {
+                  setItem(nft);
+                  setOpen(true);
+                }}
               >
-                Sell
+                Bid
               </Button>
             </div>
           );
