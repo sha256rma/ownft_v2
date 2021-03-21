@@ -1,24 +1,13 @@
 import { useEffect, useState } from "react";
 import { providers } from "ethers";
-import {
-  constructBidShares,
-  constructMediaData,
-  sha256FromBuffer,
-  generateMetadata,
-  approveERC20,
-  signer,
-  Decimal,
-  Zora,
-  constructBid,
-} from "@zoralabs/zdk";
-
+import { approveERC20, Decimal, Zora, constructBid } from "@zoralabs/zdk";
+import axios from "axios";
 import {
   AppBar,
   Tabs,
   Tab,
   GridList,
   GridListTile,
-  GridListTileBar,
   Button,
   TextField,
   Box,
@@ -78,13 +67,12 @@ function App() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
-  const [balance, setBalance] = useState(null);
-  // const [signer, setSigner] = useState({});
   const [bid, setBid] = useState({});
   const [address, setAddress] = useState("");
   const [signer, setSigner] = useState({});
-  const [wallet, setWallet] = useState({});
   const [zora, setZora] = useState({});
+  const [collectionData, setCollectionData] = useState([]);
+  const [metadata, setMetadata] = useState({});
 
   const [item, setItem] = useState({
     contentURI: "",
@@ -148,11 +136,11 @@ function App() {
 
         const zora = new Zora(signer, 4);
 
-        setAddress(myAddress);
+        setAddress(await signer.getAddress());
         setSigner(signer);
         setZora(zora);
-        console.log(zora);
-        console.log(address);
+        console.log("ZORA: ", zora);
+        console.log("address: ", address);
       })();
     } catch (error) {
       // Catch any errors for any of the above operations.
@@ -162,6 +150,19 @@ function App() {
       console.error(error);
     }
   }, []);
+
+  useEffect(() => {
+    console.log("reached here 1");
+    getAddressCollection(address)
+      .then((res) => {
+        console.log("reached here 2");
+        console.log("RES: ", res.data.data);
+        setCollectionData(res.data.data);
+      })
+      .catch((error) => {
+        console.error("error while fetching address collection: ", error);
+      });
+  }, [address]);
 
   const handleChange = (event, newValue) => {
     setTab(newValue);
@@ -202,6 +203,21 @@ function App() {
     console.log(tx);
   };
 
+  const fetchMetadata = async (metadataURI) => {
+    var config_2 = {
+      method: "get",
+      url: metadataURI,
+    };
+
+    await axios(config_2)
+      .then(function (response) {
+        setMetadata(response.data);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
+
   const renderScreen = () => {
     if (tab === 0) {
       return renderCollection();
@@ -211,60 +227,54 @@ function App() {
   };
 
   const renderCollection = () => {
-    return (
-      <GridList
-        cellHeight={300}
-        style={{
-          height: "100%",
-          width: "100%",
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: "black",
-          paddingBottom: 1000,
-        }}
-        cols={5}
-      >
-        {collectionData.data.user.collection.map((nft) => {
-          const { contentURI, metadataURI } = nft;
-          const { name } = metadataURI;
-          return (
-            <div
-              style={{
-                height: 220,
-                width: "17%",
-                margin: ".5%",
-                border: ".2px solid white",
-                borderRadius: 10,
-                padding: 10,
-              }}
-            >
-              <GridListTile
-                onClick={() => {
-                  setItem(nft);
-                  setOpen(true);
+    if (collectionData) {
+      return (
+        <GridList
+          cellHeight={300}
+          style={{
+            height: "100%",
+            width: "100%",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "black",
+            paddingBottom: 1000,
+          }}
+          cols={5}
+        >
+          {collectionData.map((nft) => {
+            const { contentURI, metadataURI } = nft;
+            return (
+              <div
+                style={{
+                  height: 180,
+                  width: "17%",
+                  margin: ".5%",
+                  border: ".1px solid white",
+                  borderRadius: 10,
+                  padding: 10,
                 }}
-                key={contentURI}
-                cols={1}
               >
-                <img
-                  style={{ height: 180, width: "100%", borderRadius: 10 }}
-                  src={contentURI}
-                  alt={name}
-                />
-                <GridListTileBar title={name} />
-              </GridListTile>
-              <Button
-                style={{ height: 40, width: "100%" }}
-                variant="outlined"
-                color="secondary"
-              >
-                Sell
-              </Button>
-            </div>
-          );
-        })}
-      </GridList>
-    );
+                <GridListTile
+                  onClick={() => {
+                    fetchMetadata(metadataURI);
+                    setItem(nft);
+                    setOpen(true);
+                  }}
+                  key={contentURI}
+                  cols={1}
+                >
+                  <img
+                    style={{ height: 180, width: "100%", borderRadius: 10 }}
+                    src={contentURI}
+                    alt={"content image"}
+                  />
+                </GridListTile>
+              </div>
+            );
+          })}
+        </GridList>
+      );
+    }
   };
 
   const renderCreate = () => {
@@ -347,8 +357,8 @@ function App() {
 
   const renderModal = () => {
     console.log("itemmm", item);
-    const { contentURI, createdAtTimestamp, creator, metadataURI } = item;
-    const { description, name } = metadataURI;
+    const { contentURI, createdAtTimestamp, creator } = item;
+    const { description, name } = metadata;
     console.log("creator", creator);
     return (
       <Modal
@@ -529,22 +539,18 @@ function App() {
             {...a11yProps(1)}
           />
         </Tabs>
-        <div
-          style={{
-            position: "absolute",
-            top: 10,
-            right: 10,
-            textAlign: "right",
-          }}
-        >
-          {/* <i className="material-icons">account_balance_wallet</i> */}
-
-          <div className="myAccountBox">
-            {/* <div className="address">Address: {address}</div> */}
-            <div className="eth"> ETH: {balance} </div>
-          </div>
-        </div>
       </AppBar>
+      <Button
+        style={{ height: 40, width: "100%" }}
+        variant="outlined"
+        color="secondary"
+        onClick={() => {
+          setAddress("0x833d2308021893284afe181987ddfdbb498842b9");
+          console.log("address after setting: ", address);
+        }}
+      >
+        get collection
+      </Button>
       {renderScreen()}
 
       {renderModal()}

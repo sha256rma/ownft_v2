@@ -76,37 +76,19 @@ app.post("/get_user_collections", async (req, res) => {
 
     await axios(config)
       .then(function (response) {
-        var all_data = response.data.data.user.collection;
-        var all_data_metadata = [];
-
-        all_data.map(async (media, i) => {
-          const { contentURI, metadataURI } = media;
-          // const maybeCid = new CID(contentURI.split("/").pop());
+        response.data.data.user.collection.map((media) => {
+          const { contentURI } = media;
+          const maybeCid = new CID(contentURI.split("/").pop());
           try {
-            // CID.validateCID(maybeCid);
-            // ipfs.pin.add(maybeCid);
-
-            var config_2 = {
-              method: "get",
-              url: metadataURI,
-            };
-
-            await axios(config_2)
-              .then(function (response) {
-                all_data_metadata.push(response.data);
-              })
-              .catch(function (error) {
-                console.log(error);
-              });
+            CID.validateCID(maybeCid);
+            ipfs.pin.add(maybeCid);
           } catch (e) {
             console.warn(`CID ${maybeCid} is not a valid CID`);
           }
         });
-
         res.send({
           message: "Successfully fetched & pinned NFTs",
-          data: all_data,
-          data_metadata: all_data_metadata,
+          data: response.data.data.user.collection,
         });
       })
       .catch(function (error) {
