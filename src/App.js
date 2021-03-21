@@ -247,7 +247,7 @@ function App() {
               <div
                 style={{
                   height: 180,
-                  width: "17%",
+                  width: 180,
                   margin: ".5%",
                   border: ".1px solid white",
                   borderRadius: 10,
@@ -264,7 +264,20 @@ function App() {
                   cols={1}
                 >
                   <img
-                    style={{ height: 180, width: "100%", borderRadius: 10 }}
+                    style={{
+                      height: 180,
+                      width: 180,
+                      objectFit: "cover",
+                      borderRadius: 10,
+                    }}
+                    onError={(e) => {
+                      e.target.src =
+                        "https://image.flaticon.com/icons/png/128/337/337946.png"; // some replacement image
+                    }}
+                    // {() =>
+                    //   (contentURI =
+                    //     "https://img.flaticon.com/icons/png/512/337/337946.png?size=1200x630f&pad=10,10,10,10&ext=png&bg=FFFFFFFF")
+                    // }
                     src={contentURI}
                     alt={"content image"}
                   />
@@ -548,7 +561,9 @@ function App() {
         variant="outlined"
         color="secondary"
         onClick={() => {
-          setAddress("0x833d2308021893284afe181987ddfdbb498842b9");
+          // 0x78913e6a689233360dc828d6b618f01033e19dc7
+          // 0x789e8dd02ffccd7a753b048559d4fbea1e1a1b7c
+          setAddress("0x1ba919573d46464a24e636c8966b61e947e3ed25");
           console.log("address after setting: ", address);
         }}
       >
