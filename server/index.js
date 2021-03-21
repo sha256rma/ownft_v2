@@ -37,6 +37,9 @@ app.post("/add", async (req, res) => {
 
 app.post("/pin/:cid", async (req, res) => {
   try {
+    const cid = new CID(req.params.cid);
+    CID.validateCID(cid);
+
     await ipfs.pin.add(new CID(req.params.cid));
     res.send({ success: true });
   } catch (e) {
@@ -55,10 +58,10 @@ app.post("/get_user_collections", async (req, res) => {
                 id
                 contentURI
                 metadataURI
+                createdAtTimestamp
                 creator {
                     id
                 }
-                createdAtTimestamp
               }
             }
           }`,
@@ -73,17 +76,42 @@ app.post("/get_user_collections", async (req, res) => {
 
     await axios(config)
       .then(function (response) {
-        res.send({
-          message: "Successfully fetched NFTs",
-          data: JSON.stringify(response.data),
+        var all_data = response.data.data.user.collection;
+        var all_data_metadata = [];
+
+        all_data.map(async (media, i) => {
+          const { contentURI, metadataURI } = media;
+          // const maybeCid = new CID(contentURI.split("/").pop());
+          try {
+            // CID.validateCID(maybeCid);
+            // ipfs.pin.add(maybeCid);
+
+            var config_2 = {
+              method: "get",
+              url: metadataURI,
+            };
+
+            await axios(config_2)
+              .then(function (response) {
+                all_data_metadata.push(response.data);
+              })
+              .catch(function (error) {
+                console.log(error);
+              });
+          } catch (e) {
+            console.warn(`CID ${maybeCid} is not a valid CID`);
+          }
         });
-        // console.log(JSON.stringify(response.data));
+
+        res.send({
+          message: "Successfully fetched & pinned NFTs",
+          data: all_data,
+          data_metadata: all_data_metadata,
+        });
       })
       .catch(function (error) {
         console.log("ERROR: ", error);
       });
-
-    console.log("after axios");
   } catch (e) {
     console.log("something went bad", e);
     res.status(500).send({ error: e });
