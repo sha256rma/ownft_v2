@@ -20,7 +20,11 @@ import {
   GridListTile,
   GridListTileBar,
   Button,
+  TextField,
+  Box,
+  Typography,
 } from "@material-ui/core";
+import ImageUploader from "react-images-upload";
 
 import "./App.css";
 import getWeb3 from "./getWeb3";
@@ -38,6 +42,10 @@ function a11yProps(index) {
 
 function App() {
   const [tab, setTab] = useState(0);
+  const [files, setFiles] = useState([]);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
   const [balance, setBalance] = useState(null);
   // const [signer, setSigner] = useState({});
   const [bid, setBid] = useState({});
@@ -151,48 +159,48 @@ function App() {
     if (tab === 0) {
       return renderCollection();
     } else if (tab === 1) {
-      return renderMarketplace();
+      return renderCreate();
     }
   };
 
-  const renderMarketplace = () => {
-    return (
-      <GridList
-        cellHeight={300}
-        style={{ height: "100%", width: "100%", backgroundColor: "black" }}
-        cols={5}
-      >
-        {marketplaceData.map((nft) => (
-          <GridListTile
-            style={{
-              height: 300,
-              width: "19%",
-              margin: ".5%",
-              border: "0.5px solid white",
-              borderRadius: 10,
-              padding: 10,
-            }}
-            key={nft.img}
-            cols={1}
-          >
-            <img
-              style={{ height: 180, width: "100%", borderRadius: 10 }}
-              src={nft.image}
-              alt={nft.name}
-            />
-            <Button onClick={bidding} variant="outlined" color="primary">
-              Purchase
-            </Button>
-            <GridListTileBar
-              style={{ height: 40 }}
-              title={nft.name}
-              subtitle={`${nft.cost} ETH`}
-            />
-          </GridListTile>
-        ))}
-      </GridList>
-    );
-  };
+  // const renderMarketplace = () => {
+  //   return (
+  //     <GridList
+  //       cellHeight={300}
+  //       style={{ height: "100%", width: "100%", backgroundColor: "black" }}
+  //       cols={5}
+  //     >
+  //       {marketplaceData.map((nft) => (
+  //         <GridListTile
+  //           style={{
+  //             height: 300,
+  //             width: "19%",
+  //             margin: ".5%",
+  //             border: "0.5px solid white",
+  //             borderRadius: 10,
+  //             padding: 10,
+  //           }}
+  //           key={nft.img}
+  //           cols={1}
+  //         >
+  //           <img
+  //             style={{ height: 180, width: "100%", borderRadius: 10 }}
+  //             src={nft.image}
+  //             alt={nft.name}
+  //           />
+  //           <Button onClick={bidding} variant="outlined" color="primary">
+  //             Purchase
+  //           </Button>
+  //           <GridListTileBar
+  //             style={{ height: 40 }}
+  //             title={nft.name}
+  //             subtitle={`${nft.cost} ETH`}
+  //           />
+  //         </GridListTile>
+  //       ))}
+  //     </GridList>
+  //   );
+  // };
 
   const renderCollection = () => {
     return (
@@ -236,6 +244,84 @@ function App() {
           </div>
         ))}
       </GridList>
+    );
+  };
+
+  const renderCreate = () => {
+    return (
+      <Box
+        style={{
+          flex: 1,
+          height: 2000,
+          backgoundColor: "white",
+          paddingLeft: 150,
+          paddingRight: 150,
+        }}
+      >
+        <Typography style={{ marginBottom: 20, color: "white" }} variant="h4">
+          Create a collectible
+        </Typography>
+        <Box m={1} p={2} style={{ border: "1px solid white" }}>
+          <Typography style={{ marginBottom: 20, color: "white" }} variant="h6">
+            Upload a File
+          </Typography>
+          <ImageUploader
+            withPreview
+            withIcon={true}
+            singleImage
+            buttonText="Upload File"
+            onChange={(pictureFiles, pictureDataURLs) => setFiles(pictureFiles)}
+            imgExtension={[".jpg", ".gif", ".png"]}
+            maxFileSize={5242880}
+          />
+        </Box>
+
+        <Box m={1} p={1} style={{ marginTop: 50 }}>
+          <Typography style={{ marginBottom: 20, color: "white" }} variant="h6">
+            Details
+          </Typography>
+          <Box
+            p={2}
+            style={{ backgroundColor: "white", border: "1px solid white" }}
+          >
+            <TextField
+              style={{ marginRight: 10 }}
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              id="name"
+              label="Name"
+              variant="outlined"
+              color="secondary"
+            />
+            <TextField
+              style={{ marginRight: 10 }}
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              id="description"
+              label="Description"
+              variant="outlined"
+              color="secondary"
+            />
+            <TextField
+              style={{ marginRight: 10 }}
+              value={price}
+              onChange={(event) => setPrice(event.target.value)}
+              id="price"
+              label="Price"
+              variant="outlined"
+              color="secondary"
+            />
+          </Box>
+          <Button
+            onPress={() => console.log("create nft")}
+            style={{ marginTop: 30, width: "100%" }}
+            variant="contained"
+            color="secondary"
+          >
+            Create
+          </Button>
+        </Box>
+      </Box>
     );
   };
 
