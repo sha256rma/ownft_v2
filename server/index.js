@@ -2,6 +2,8 @@ import express from "express";
 import axios from "axios";
 import fileUpload from "express-fileupload";
 import ipfsClient from "ipfs-http-client";
+import pkg from "ipfs-http-client";
+const { CID } = ipfsClient;
 
 const ipfs = ipfsClient();
 
