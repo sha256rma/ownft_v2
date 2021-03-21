@@ -119,7 +119,7 @@ function App() {
     // grant approval
     await approveERC20(signer, dai, zora.marketAddress, MaxUint256);
 
-    const decimal100 = Decimal.new(bid);
+    const decimal100 = Decimal.new(100);
 
     const bid = constructBid(
       dai, // currency
