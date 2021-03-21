@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
-import { Zora } from "@zoralabs/zdk";
 import { providers } from "ethers";
 import {
   constructBidShares,
   constructMediaData,
   sha256FromBuffer,
   generateMetadata,
+  approveERC20,
+  signer,
+  Decimal,
+  Zora,
+  constructBid,
 } from "@zoralabs/zdk";
 
 import {
@@ -21,6 +25,8 @@ import {
 import "./App.css";
 import getWeb3 from "./getWeb3";
 
+import { MaxUint256 } from "@ethersproject/constants";
+
 import { getAddressCollection } from "./api/media";
 
 function a11yProps(index) {
@@ -32,30 +38,66 @@ function a11yProps(index) {
 
 function App() {
   const [tab, setTab] = useState(0);
-  const [address, setAddress] = useState("0x");
   const [balance, setBalance] = useState(null);
+  // const [signer, setSigner] = useState({});
+  const [bid, setBid] = useState({});
+  const [address, setAddress] = useState("");
+  const [signer, setSigner] = useState({});
+  const [wallet, setWallet] = useState({});
+  const [zora, setZora] = useState({});
 
   useEffect(() => {
     try {
       (async () => {
         // Get network provider and web3 instance.
+        // const web3 = await getWeb3();
+        // // Use web3 to get the user's accounts.
+        // const accounts = await web3.eth.getAccounts();
+
+        // // setAddress(getAccount[0]);
+
+        // // const getBalance = await web3.eth.getBalance(getAccount[0]);
+
+        // // setBalance(getBalance * 1e-18);
+
+        // const provider = new providers.Web3Provider(window.ethereum);
+
+        // const signer = provider.getSigner();
+
+        // // setSigner(signer);
+
+        // const myAddress = await signer.getAddress();
+
+        // const zora = new Zora(signer, 4);
+
+        // setAddress(myAddress);
+
+        // console.log("add", address);
+
+        // setZora(zora);
+
+        // console.log("zora", zora);
+
         const web3 = await getWeb3();
+
         // Use web3 to get the user's accounts.
-        const getAccount = await web3.eth.getAccounts();
-
-        setAddress(getAccount[0]);
-
-        const getBalance = await web3.eth.getBalance(getAccount[0]);
-
-        setBalance(getBalance * 1e-18);
+        const accounts = await web3.eth.getAccounts();
 
         const provider = new providers.Web3Provider(window.ethereum);
 
-        console.log(provider);
+        const signer = provider.getSigner();
 
-        const zora = new Zora(provider, 4);
+        const myAddress = await signer.getAddress();
 
-        console.log("zora", zora);
+        console.log("add", myAddress);
+
+        const zora = new Zora(signer, 4);
+
+        setAddress(myAddress);
+        setSigner(signer);
+        setZora(zora);
+        console.log(zora);
+        console.log(address);
       })();
     } catch (error) {
       // Catch any errors for any of the above operations.
@@ -68,6 +110,41 @@ function App() {
 
   const handleChange = (event, newValue) => {
     setTab(newValue);
+  };
+
+  const bidding = async () => {
+    const dai = "0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea";
+
+    console.log(address);
+    // grant approval
+    await approveERC20(signer, dai, zora.marketAddress, MaxUint256);
+
+    const decimal100 = Decimal.new(bid);
+
+    const bid = constructBid(
+      dai, // currency
+      // Decimal.new(10).value, // amount 10*10^18
+      decimal100.value, // amount 10*10^18
+      address, // bidder address
+      address, // recipient address (address to receive Media if bid is accepted)
+      10 // sellOnShare
+    );
+
+    const tx = await zora.setBid(546, bid);
+    await tx.wait(8); // 8 confirmations to finalize
+    console.log(tx);
+  };
+
+  const acceptBid = async () => {
+    const dai = "0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea";
+
+    console.log(address);
+    // grant approval
+    await approveERC20(signer, dai, zora.marketAddress, MaxUint256);
+
+    const tx = await zora.acceptBid(546, bid);
+    await tx.wait(8); // 8 confirmations to finalize
+    console.log(tx);
   };
 
   const renderScreen = () => {
@@ -103,7 +180,7 @@ function App() {
               src={nft.image}
               alt={nft.name}
             />
-            <Button variant="outlined" color="primary">
+            <Button onClick={bidding} variant="outlined" color="primary">
               Purchase
             </Button>
             <GridListTileBar
@@ -222,7 +299,7 @@ function App() {
           {/* <i className="material-icons">account_balance_wallet</i> */}
 
           <div className="myAccountBox">
-            <div className="address">Address: {address}</div>
+            {/* <div className="address">Address: {address}</div> */}
             <div className="eth"> ETH: {balance} </div>
           </div>
         </div>
