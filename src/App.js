@@ -136,11 +136,12 @@ function App() {
 
         const zora = new Zora(signer, 4);
 
-        setAddress(await signer.getAddress());
+        // setAddress(await signer.getAddress());
         setSigner(signer);
         setZora(zora);
         console.log("ZORA: ", zora);
         console.log("address: ", address);
+        setAddress("0x1ba919573d46464a24e636c8966b61e947e3ed25");
       })();
     } catch (error) {
       // Catch any errors for any of the above operations.
@@ -171,7 +172,6 @@ function App() {
   const bidding = async () => {
     const dai = "0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea";
 
-    console.log(address);
     // grant approval
     await approveERC20(signer, dai, zora.marketAddress, MaxUint256);
 
@@ -181,8 +181,8 @@ function App() {
       dai, // currency
       // Decimal.new(10).value, // amount 10*10^18
       decimal100.value, // amount 10*10^18
-      address, // bidder address
-      address, // recipient address (address to receive Media if bid is accepted)
+      "0x270Cb494f93E7d89A58AF505406400036251F762", // bidder address
+      "0x270Cb494f93E7d89A58AF505406400036251F762", // recipient address (address to receive Media if bid is accepted)
       10 // sellOnShare
     );
 
@@ -303,7 +303,11 @@ function App() {
       >
         <Box m={1} p={2} style={{ border: "1px solid white" }}>
           <Typography
-            style={{ marginBottom: 20, textAlign: "center" }}
+            style={{
+              marginBottom: 20,
+              textAlign: "center",
+              fontFamily: "Helvetica Neue",
+            }}
             variant="h6"
           >
             Upload a File
@@ -320,7 +324,10 @@ function App() {
         </Box>
 
         <Box m={1} p={1} style={{ marginTop: 50 }}>
-          <Typography style={{ marginBottom: 20 }} variant="h6">
+          <Typography
+            style={{ marginBottom: 20, fontFamily: "Helvetica Neue" }}
+            variant="h6"
+          >
             Details
           </Typography>
           <Box
@@ -328,7 +335,7 @@ function App() {
             style={{ backgroundColor: "white", border: "1px solid white" }}
           >
             <TextField
-              style={{ marginRight: 10 }}
+              style={{ marginRight: 10, fontFamily: "Helvetica Neue" }}
               value={name}
               onChange={(event) => setName(event.target.value)}
               id="name"
@@ -338,7 +345,7 @@ function App() {
               autoComplete={false}
             />
             <TextField
-              style={{ marginLeft: 10 }}
+              style={{ marginLeft: 10, fontFamily: "Helvetica Neue" }}
               value={description}
               onChange={(event) => setDescription(event.target.value)}
               id="description"
@@ -348,11 +355,11 @@ function App() {
               autoComplete={false}
             />
             <TextField
-              style={{ marginTop: 10, marginRight: 10 }}
+              style={{ marginLeft: 20, fontFamily: "Helvetica Neue" }}
               value={price}
               onChange={(event) => setPrice(event.target.value)}
               id="price"
-              label="Price"
+              label="Creator Share Percentage"
               variant="outlined"
               color="secondary"
               autoComplete={false}
@@ -360,7 +367,11 @@ function App() {
           </Box>
           <Button
             onPress={() => console.log("create nft")}
-            style={{ marginTop: 30, width: "100%" }}
+            style={{
+              marginTop: 30,
+              width: "100%",
+              fontFamily: "Helvetica Neue",
+            }}
             variant="contained"
             color="secondary"
           >
@@ -389,16 +400,30 @@ function App() {
         aria-describedby="simple-modal-description"
       >
         <Box p={2} style={{ backgroundColor: "black" }}>
-          <Typography variant="h5" style={{ color: "white", marginBottom: 5 }}>
+          <Typography
+            variant="h5"
+            style={{
+              color: "white",
+              marginBottom: 5,
+              fontFamily: "Helvetica Neue",
+            }}
+          >
             {name}
           </Typography>
           <Typography
             variant="body1"
-            style={{ color: "white", marginBottom: 5 }}
+            style={{
+              color: "white",
+              marginBottom: 5,
+              fontFamily: "Helvetica Neue",
+            }}
           >
             Created By: {creator.id}
           </Typography>
-          <Typography variant="caption" style={{ color: "white" }}>
+          <Typography
+            variant="caption"
+            style={{ color: "white", fontFamily: "Helvetica Neue" }}
+          >
             {timeConverter(createdAtTimestamp)}
           </Typography>
 
@@ -409,20 +434,27 @@ function App() {
               alt={name}
             />
             <Box>
-              <Typography variant="body1" style={{ color: "white" }}>
+              <Typography
+                variant="body1"
+                style={{ color: "white", fontFamily: "Helvetica Neue" }}
+              >
                 Description
               </Typography>
-              <Typography variant="caption" style={{ color: "white" }}>
+              <Typography
+                variant="caption"
+                style={{ color: "white", fontFamily: "Helvetica Neue" }}
+              >
                 {description}
               </Typography>
-              <div
+
+              <Typography
+                variant="body1"
                 style={{
-                  border: "1px solid white",
-                  marginTop: 15,
-                  marginBottom: 15,
+                  color: "white",
+                  marginTop: 50,
+                  fontFamily: "Helvetica Neue",
                 }}
-              />
-              <Typography variant="body1" style={{ color: "white" }}>
+              >
                 Current Bids
               </Typography>
               <Paper
@@ -433,62 +465,28 @@ function App() {
                 }}
               >
                 <List style={{ color: "white" }}>
-                  {[
-                    {
-                      price: 13.3,
-                      bidder: "0x4153614ec1836e8916020aee69d67a9e1e495dbf",
-                    },
-                    {
-                      price: 13.3,
-                      bidder: "0x4153614ec1836e8916020aee69d67a9e1e495dbf",
-                    },
-                    {
-                      price: 13.3,
-                      bidder: "0x4153614ec1836e8916020aee69d67a9e1e495dbf",
-                    },
-                    {
-                      price: 13.3,
-                      bidder: "0x4153614ec1836e8916020aee69d67a9e1e495dbf",
-                    },
-                    {
-                      price: 13.3,
-                      bidder: "0x4153614ec1836e8916020aee69d67a9e1e495dbf",
-                    },
-                    {
-                      price: 13.3,
-                      bidder: "0x4153614ec1836e8916020aee69d67a9e1e495dbf",
-                    },
-                  ].map((bid) => {
-                    return (
-                      <ListItem style={{ border: "1px solid white" }}>
-                        <ListItemText
-                          primary={
-                            <Typography
-                              style={{ color: "white" }}
-                              variant="body2"
-                            >
-                              {bid.price}
-                            </Typography>
-                          }
-                          secondary={
-                            <Typography
-                              style={{ color: "white" }}
-                              variant="caption"
-                            >
-                              {bid.bidder}
-                            </Typography>
-                          }
-                        />
-                      </ListItem>
-                    );
-                  })}
+                  <ListItem style={{ border: "1px solid white" }}>
+                    <ListItemText
+                      primary={
+                        <Typography
+                          style={{
+                            color: "white",
+                            fontFamily: "Helvetica Neue",
+                          }}
+                          variant="body2"
+                        >
+                          No bids currently :(
+                        </Typography>
+                      }
+                    />
+                  </ListItem>
                 </List>
               </Paper>
               <Box
                 display="flex"
                 flexDirection="row"
                 alignItems="center"
-                style={{ padding: 10, backgroundColor: "white" }}
+                style={{ marginTop: 30, padding: 10, backgroundColor: "black" }}
               >
                 <TextField
                   style={{
@@ -500,7 +498,8 @@ function App() {
                   onChange={(event) => setMyBid(event.target.value)}
                   id="bidamount"
                   label="Bid Amount"
-                  variant="outlined"
+                  focused={true}
+                  variant="filled"
                   color="secondary"
                 />
                 <Button
@@ -509,9 +508,11 @@ function App() {
                     height: 55,
                     marginLeft: 10,
                     marginTop: 7,
+                    fontFamily: "Helvetica Neue",
                   }}
                   variant="contained"
                   color="secondary"
+                  onClick={bidding}
                 >
                   Bid Now
                 </Button>
@@ -556,7 +557,7 @@ function App() {
           />
         </Tabs>
       </AppBar>
-      <Button
+      {/* <Button
         style={{ height: 40, width: "100%" }}
         variant="outlined"
         color="secondary"
@@ -568,7 +569,7 @@ function App() {
         }}
       >
         get collection
-      </Button>
+      </Button> */}
       {renderScreen()}
 
       {renderModal()}
