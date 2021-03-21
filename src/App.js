@@ -23,6 +23,11 @@ import {
   TextField,
   Box,
   Typography,
+  Modal,
+  List,
+  ListItem,
+  ListItemText,
+  Paper,
 } from "@material-ui/core";
 import ImageUploader from "react-images-upload";
 
@@ -32,6 +37,33 @@ import getWeb3 from "./getWeb3";
 import { MaxUint256 } from "@ethersproject/constants";
 
 import { getAddressCollection } from "./api/media";
+
+function timeConverter(UNIX_timestamp) {
+  var a = new Date(UNIX_timestamp * 1000);
+  var months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  var year = a.getFullYear();
+  var month = months[a.getMonth()];
+  var date = a.getDate();
+  var hour = a.getHours();
+  var min = a.getMinutes();
+  var sec = a.getSeconds();
+  var time =
+    date + " " + month + " " + year + " " + hour + ":" + min + ":" + sec;
+  return time;
+}
 
 function a11yProps(index) {
   return {
@@ -53,6 +85,21 @@ function App() {
   const [signer, setSigner] = useState({});
   const [wallet, setWallet] = useState({});
   const [zora, setZora] = useState({});
+
+  const [item, setItem] = useState({
+    contentURI: "",
+    createdAtTimestamp: "",
+    creator: { id: "" },
+    id: "",
+    metadataURI: {
+      description: "",
+      mimeType: "",
+      name: "",
+      version: "",
+    },
+  });
+  const [open, setOpen] = useState(false);
+  const [myBid, setMyBid] = useState(0);
 
   useEffect(() => {
     try {
@@ -163,45 +210,6 @@ function App() {
     }
   };
 
-  // const renderMarketplace = () => {
-  //   return (
-  //     <GridList
-  //       cellHeight={300}
-  //       style={{ height: "100%", width: "100%", backgroundColor: "black" }}
-  //       cols={5}
-  //     >
-  //       {marketplaceData.map((nft) => (
-  //         <GridListTile
-  //           style={{
-  //             height: 300,
-  //             width: "19%",
-  //             margin: ".5%",
-  //             border: "0.5px solid white",
-  //             borderRadius: 10,
-  //             padding: 10,
-  //           }}
-  //           key={nft.img}
-  //           cols={1}
-  //         >
-  //           <img
-  //             style={{ height: 180, width: "100%", borderRadius: 10 }}
-  //             src={nft.image}
-  //             alt={nft.name}
-  //           />
-  //           <Button onClick={bidding} variant="outlined" color="primary">
-  //             Purchase
-  //           </Button>
-  //           <GridListTileBar
-  //             style={{ height: 40 }}
-  //             title={nft.name}
-  //             subtitle={`${nft.cost} ETH`}
-  //           />
-  //         </GridListTile>
-  //       ))}
-  //     </GridList>
-  //   );
-  // };
-
   const renderCollection = () => {
     return (
       <GridList
@@ -212,37 +220,49 @@ function App() {
           justifyContent: "center",
           alignItems: "center",
           backgroundColor: "black",
+          paddingBottom: 1000,
         }}
         cols={5}
       >
-        {marketplaceData.map((nft) => (
-          <div
-            style={{
-              height: 220,
-              width: "17%",
-              margin: ".5%",
-              border: ".2px solid white",
-              borderRadius: 10,
-              padding: 10,
-            }}
-          >
-            <GridListTile key={nft.img} cols={1}>
-              <img
-                style={{ height: 180, width: "100%", borderRadius: 10 }}
-                src={nft.image}
-                alt={nft.name}
-              />
-              <GridListTileBar title={nft.name} />
-            </GridListTile>
-            <Button
-              style={{ height: 40, width: "100%" }}
-              variant="outlined"
-              color="secondary"
+        {collectionData.data.user.collection.map((nft) => {
+          const { contentURI, metadataURI } = nft;
+          const { name } = metadataURI;
+          return (
+            <div
+              style={{
+                height: 220,
+                width: "17%",
+                margin: ".5%",
+                border: ".2px solid white",
+                borderRadius: 10,
+                padding: 10,
+              }}
             >
-              Sell
-            </Button>
-          </div>
-        ))}
+              <GridListTile
+                onClick={() => {
+                  setItem(nft);
+                  setOpen(true);
+                }}
+                key={contentURI}
+                cols={1}
+              >
+                <img
+                  style={{ height: 180, width: "100%", borderRadius: 10 }}
+                  src={contentURI}
+                  alt={name}
+                />
+                <GridListTileBar title={name} />
+              </GridListTile>
+              <Button
+                style={{ height: 40, width: "100%" }}
+                variant="outlined"
+                color="secondary"
+              >
+                Sell
+              </Button>
+            </div>
+          );
+        })}
       </GridList>
     );
   };
@@ -258,11 +278,11 @@ function App() {
           paddingRight: 150,
         }}
       >
-        <Typography style={{ marginBottom: 20, color: "white" }} variant="h4">
+        <Typography style={{ marginBottom: 20, marginTop: 50 }} variant="h4">
           Create a collectible
         </Typography>
         <Box m={1} p={2} style={{ border: "1px solid white" }}>
-          <Typography style={{ marginBottom: 20, color: "white" }} variant="h6">
+          <Typography style={{ marginBottom: 20 }} variant="h6">
             Upload a File
           </Typography>
           <ImageUploader
@@ -277,7 +297,7 @@ function App() {
         </Box>
 
         <Box m={1} p={1} style={{ marginTop: 50 }}>
-          <Typography style={{ marginBottom: 20, color: "white" }} variant="h6">
+          <Typography style={{ marginBottom: 20 }} variant="h6">
             Details
           </Typography>
           <Box
@@ -325,24 +345,159 @@ function App() {
     );
   };
 
-  const getCollection = () => {
-    getAddressCollection("0x4153614ec1836e8916020aee69d67a9e1e495dbf").then(
-      (res) => {
-        console.log("res: ", res);
-      }
+  const renderModal = () => {
+    console.log("itemmm", item);
+    const { contentURI, createdAtTimestamp, creator, metadataURI } = item;
+    const { description, name } = metadataURI;
+    console.log("creator", creator);
+    return (
+      <Modal
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+        open={open}
+        onClose={() => setOpen(false)}
+        aria-labelledby="simple-modal-title"
+        aria-describedby="simple-modal-description"
+      >
+        <Box p={2} style={{ backgroundColor: "black" }}>
+          <Typography variant="h5" style={{ color: "white", marginBottom: 5 }}>
+            {name}
+          </Typography>
+          <Typography
+            variant="body1"
+            style={{ color: "white", marginBottom: 5 }}
+          >
+            Created By: {creator.id}
+          </Typography>
+          <Typography variant="caption" style={{ color: "white" }}>
+            {timeConverter(createdAtTimestamp)}
+          </Typography>
+
+          <Box display="flex" style={{ marginTop: 20 }} flexDirection="row">
+            <img
+              style={{ height: 350, marginRight: 15 }}
+              src={contentURI}
+              alt={name}
+            />
+            <Box>
+              <Typography variant="body1" style={{ color: "white" }}>
+                Description
+              </Typography>
+              <Typography variant="caption" style={{ color: "white" }}>
+                {description}
+              </Typography>
+              <div
+                style={{
+                  border: "1px solid white",
+                  marginTop: 15,
+                  marginBottom: 15,
+                }}
+              />
+              <Typography variant="body1" style={{ color: "white" }}>
+                Current Bids
+              </Typography>
+              <Paper
+                style={{
+                  maxHeight: 300,
+                  overflow: "auto",
+                  backgroundColor: "black",
+                }}
+              >
+                <List style={{ color: "white" }}>
+                  {[
+                    {
+                      price: 13.3,
+                      bidder: "0x4153614ec1836e8916020aee69d67a9e1e495dbf",
+                    },
+                    {
+                      price: 13.3,
+                      bidder: "0x4153614ec1836e8916020aee69d67a9e1e495dbf",
+                    },
+                    {
+                      price: 13.3,
+                      bidder: "0x4153614ec1836e8916020aee69d67a9e1e495dbf",
+                    },
+                    {
+                      price: 13.3,
+                      bidder: "0x4153614ec1836e8916020aee69d67a9e1e495dbf",
+                    },
+                    {
+                      price: 13.3,
+                      bidder: "0x4153614ec1836e8916020aee69d67a9e1e495dbf",
+                    },
+                    {
+                      price: 13.3,
+                      bidder: "0x4153614ec1836e8916020aee69d67a9e1e495dbf",
+                    },
+                  ].map((bid) => {
+                    return (
+                      <ListItem style={{ border: "1px solid white" }}>
+                        <ListItemText
+                          primary={
+                            <Typography
+                              style={{ color: "white" }}
+                              variant="body2"
+                            >
+                              {bid.price}
+                            </Typography>
+                          }
+                          secondary={
+                            <Typography
+                              style={{ color: "white" }}
+                              variant="caption"
+                            >
+                              {bid.bidder}
+                            </Typography>
+                          }
+                        />
+                      </ListItem>
+                    );
+                  })}
+                </List>
+              </Paper>
+              <Box
+                display="flex"
+                flexDirection="row"
+                alignItems="center"
+                style={{ padding: 10, backgroundColor: "white" }}
+              >
+                <TextField
+                  style={{
+                    marginTop: 10,
+                    width: "40%",
+                    backgroundColor: "white",
+                  }}
+                  value={myBid}
+                  onChange={(event) => setMyBid(event.target.value)}
+                  id="bidamount"
+                  label="Bid Amount"
+                  variant="outlined"
+                  color="secondary"
+                />
+                <Button
+                  style={{
+                    width: "60%",
+                    height: 55,
+                    marginLeft: 10,
+                    marginTop: 7,
+                  }}
+                  variant="contained"
+                  color="secondary"
+                >
+                  Bid Now
+                </Button>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+      </Modal>
     );
   };
 
   return (
-    // <div className="App">
-    //   <header className="App-header">
-    //     <img src={logo} className="App-logo" alt="logo" />
-    //     <p>
-    //       Edit <code>src/App.js</code> and save to reload.
-    //     </p>
-    //     <button onClick={minting}>Mint cryptomedia</button>
-    //     <button onClick={getCollection}>Get Collection</button>
-    //   </header>
     <div className="App">
       <AppBar
         style={{
@@ -370,7 +525,7 @@ function App() {
               marginLeft: 20,
               fontFamily: "Helvetica Neue",
             }}
-            label="Marketplace"
+            label="Create NFT"
             {...a11yProps(1)}
           />
         </Tabs>
@@ -391,13 +546,149 @@ function App() {
         </div>
       </AppBar>
       {renderScreen()}
+
+      {renderModal()}
     </div>
   );
 }
 
 export default App;
 
-const collectionData = [];
+const collectionData = {
+  data: {
+    user: {
+      collection: [
+        {
+          contentURI:
+            "https://ipfs.fleek.co/ipfs/bafybeiflgb6o7m6hyj7qethlsjmkzmorug2bwkeglrf3qexl54mgz2dmbe",
+          createdAtTimestamp: "1616190458",
+          creator: { id: "0x4153614ec1836e8916020aee69d67a9e1e495dbf" },
+          id: "2335",
+          metadataURI: {
+            description:
+              "CONTEXT: https://niallashley.com/gcheck/nAcrylic, oil stick and spray paint on NFT.",
+            mimeType: "image/jpeg",
+            name: "G-check",
+            version: "zora-20210101",
+          },
+        },
+        {
+          contentURI:
+            "https://ipfs.fleek.co/ipfs/bafybeiflgb6o7m6hyj7qethlsjmkzmorug2bwkeglrf3qexl54mgz2dmbe",
+          createdAtTimestamp: "1616190458",
+          creator: { id: "0x4153614ec1836e8916020aee69d67a9e1e495dbf" },
+          id: "2335",
+          metadataURI: {
+            description:
+              "CONTEXT: https://niallashley.com/gcheck/nAcrylic, oil stick and spray paint on NFT.",
+            mimeType: "image/jpeg",
+            name: "G-check",
+            version: "zora-20210101",
+          },
+        },
+        {
+          contentURI:
+            "https://ipfs.fleek.co/ipfs/bafybeiflgb6o7m6hyj7qethlsjmkzmorug2bwkeglrf3qexl54mgz2dmbe",
+          createdAtTimestamp: "1616190458",
+          creator: { id: "0x4153614ec1836e8916020aee69d67a9e1e495dbf" },
+          id: "2335",
+          metadataURI: {
+            description:
+              "CONTEXT: https://niallashley.com/gcheck/nAcrylic, oil stick and spray paint on NFT.",
+            mimeType: "image/jpeg",
+            name: "G-check",
+            version: "zora-20210101",
+          },
+        },
+        {
+          contentURI:
+            "https://ipfs.fleek.co/ipfs/bafybeiflgb6o7m6hyj7qethlsjmkzmorug2bwkeglrf3qexl54mgz2dmbe",
+          createdAtTimestamp: "1616190458",
+          creator: { id: "0x4153614ec1836e8916020aee69d67a9e1e495dbf" },
+          id: "2335",
+          metadataURI: {
+            description:
+              "CONTEXT: https://niallashley.com/gcheck/nAcrylic, oil stick and spray paint on NFT.",
+            mimeType: "image/jpeg",
+            name: "G-check",
+            version: "zora-20210101",
+          },
+        },
+        {
+          contentURI:
+            "https://ipfs.fleek.co/ipfs/bafybeiflgb6o7m6hyj7qethlsjmkzmorug2bwkeglrf3qexl54mgz2dmbe",
+          createdAtTimestamp: "1616190458",
+          creator: { id: "0x4153614ec1836e8916020aee69d67a9e1e495dbf" },
+          id: "2335",
+          metadataURI: {
+            description:
+              "CONTEXT: https://niallashley.com/gcheck/nAcrylic, oil stick and spray paint on NFT.",
+            mimeType: "image/jpeg",
+            name: "G-check",
+            version: "zora-20210101",
+          },
+        },
+        {
+          contentURI:
+            "https://ipfs.fleek.co/ipfs/bafybeiflgb6o7m6hyj7qethlsjmkzmorug2bwkeglrf3qexl54mgz2dmbe",
+          createdAtTimestamp: "1616190458",
+          creator: { id: "0x4153614ec1836e8916020aee69d67a9e1e495dbf" },
+          id: "2335",
+          metadataURI: {
+            description:
+              "CONTEXT: https://niallashley.com/gcheck/nAcrylic, oil stick and spray paint on NFT.",
+            mimeType: "image/jpeg",
+            name: "G-check",
+            version: "zora-20210101",
+          },
+        },
+        {
+          contentURI:
+            "https://ipfs.fleek.co/ipfs/bafybeiflgb6o7m6hyj7qethlsjmkzmorug2bwkeglrf3qexl54mgz2dmbe",
+          createdAtTimestamp: "1616190458",
+          creator: { id: "0x4153614ec1836e8916020aee69d67a9e1e495dbf" },
+          id: "2335",
+          metadataURI: {
+            description:
+              "CONTEXT: https://niallashley.com/gcheck/nAcrylic, oil stick and spray paint on NFT.",
+            mimeType: "image/jpeg",
+            name: "G-check",
+            version: "zora-20210101",
+          },
+        },
+        {
+          contentURI:
+            "https://ipfs.fleek.co/ipfs/bafybeiflgb6o7m6hyj7qethlsjmkzmorug2bwkeglrf3qexl54mgz2dmbe",
+          createdAtTimestamp: "1616190458",
+          creator: { id: "0x4153614ec1836e8916020aee69d67a9e1e495dbf" },
+          id: "2335",
+          metadataURI: {
+            description:
+              "CONTEXT: https://niallashley.com/gcheck/nAcrylic, oil stick and spray paint on NFT.",
+            mimeType: "image/jpeg",
+            name: "G-check",
+            version: "zora-20210101",
+          },
+        },
+        {
+          contentURI:
+            "https://ipfs.fleek.co/ipfs/bafybeiflgb6o7m6hyj7qethlsjmkzmorug2bwkeglrf3qexl54mgz2dmbe",
+          createdAtTimestamp: "1616190458",
+          creator: { id: "0x4153614ec1836e8916020aee69d67a9e1e495dbf" },
+          id: "2335",
+          metadataURI: {
+            description:
+              "CONTEXT: https://niallashley.com/gcheck/nAcrylic, oil stick and spray paint on NFT.",
+            mimeType: "image/jpeg",
+            name: "G-check",
+            version: "zora-20210101",
+          },
+        },
+      ],
+      id: "0x4153614ec1836e8916020aee69d67a9e1e495dbf",
+    },
+  },
+};
 
 const marketplaceData = [
   {
