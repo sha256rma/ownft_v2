@@ -288,11 +288,11 @@ function App() {
           paddingRight: 150,
         }}
       >
-        <Typography style={{ marginBottom: 20, marginTop: 50 }} variant="h4">
-          Create a collectible
-        </Typography>
         <Box m={1} p={2} style={{ border: "1px solid white" }}>
-          <Typography style={{ marginBottom: 20 }} variant="h6">
+          <Typography
+            style={{ marginBottom: 20, textAlign: "center" }}
+            variant="h6"
+          >
             Upload a File
           </Typography>
           <ImageUploader
@@ -322,24 +322,27 @@ function App() {
               label="Name"
               variant="outlined"
               color="secondary"
+              autoComplete={false}
             />
             <TextField
-              style={{ marginRight: 10 }}
+              style={{ marginLeft: 10 }}
               value={description}
               onChange={(event) => setDescription(event.target.value)}
               id="description"
               label="Description"
               variant="outlined"
               color="secondary"
+              autoComplete={false}
             />
             <TextField
-              style={{ marginRight: 10 }}
+              style={{ marginTop: 10, marginRight: 10 }}
               value={price}
               onChange={(event) => setPrice(event.target.value)}
               id="price"
               label="Price"
               variant="outlined"
               color="secondary"
+              autoComplete={false}
             />
           </Box>
           <Button
