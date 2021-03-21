@@ -30,7 +30,7 @@ git clone https://github.com/sha256rma/ownft_v2.git
 
 # -- Install project
 cd ownft_v2/server
-yarn install
+npm install
 
 # -- Run project
 screen -d -m node index.js
