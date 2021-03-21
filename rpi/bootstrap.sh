@@ -26,12 +26,15 @@ ipfs init
 cd /home/pi
 
 # -- Get repo 
-git clone https://github.com/sha256rma/ownft.git
+git clone https://github.com/sha256rma/ownft_v2.git
 
 # -- Install project
-cd ownft/server
+cd ownft_v2/server
 yarn install
 
 # -- Run project
-screen node index.js
-screen ipfs daemon
+screen -d -m node index.js
+screen -d -m ipfs daemon
+
+cd ../
+screen -d -m npm run start
