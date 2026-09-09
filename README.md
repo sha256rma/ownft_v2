@@ -19,23 +19,10 @@ More projects: https://sha512rma.eth.limo/projects/
 
 ## Run it
 
-Front end:
-
 ```bash
-npm install
-npm start
-```
-
-Server:
-
-```bash
-cd server && npm install && npm start
-```
-
-Contracts:
-
-```bash
-npx truffle migrate
+npm install && npm start              # front end
+cd server && npm install && npm start # server
+npx truffle migrate                   # contracts
 ```
 
 ## Authors
@@ -43,8 +30,5 @@ npx truffle migrate
 Alex Matson ([alexmat2on](https://github.com/alexmat2on)),
 Kartikeya Sharma ([sha256rma](https://github.com/sha256rma)),
 Denny Liang ([denny999222](https://github.com/denny999222)),
-Taehun Lim ([kevtae](https://github.com/kevtae))
-
-## License
-
-MIT. See [LICENSE](LICENSE).
+Taehun Lim ([kevtae](https://github.com/kevtae)).
+MIT licensed, see [LICENSE](LICENSE).
