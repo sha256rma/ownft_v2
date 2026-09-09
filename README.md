@@ -1,43 +1,50 @@
-# Project Title - ownft
+# ownft_v2
 
-## Description
+Self-hostable IPFS-backed data availability for NFTs, with a hardware wallet
+component. Built at
+[ETHGlobal NFTHACK 2021](https://hack.ethglobal.co/showcase/ownft-rec5dwI2zHRi0RAss).
 
-Hardware wallet for NFT that enables you to truly own and showcase your art with hosted IPFS node
+Most NFTs point at media somebody else is hosting. ownft moves that storage onto
+hardware you control: a Raspberry Pi pins your own media over IPFS, so the asset
+stays available without depending on a third-party gateway staying up.
 
+More projects: https://sha512rma.eth.limo/projects/
 
-### Installing
+## Layout
 
-A step by step series of examples that tell you how to get a development env running
+- `contracts/`, `migrations/`: Solidity contracts, deployed with Truffle.
+- `src/`: React front end for minting and viewing.
+- `server/`: Node service backing the front end.
+- `rpi/`: Raspberry Pi provisioning (`bootstrap.sh`, `ssh-cp.sh`).
 
-Say what the step will be
+## Run it
 
+Front end:
+
+```bash
+npm install
+npm start
 ```
-Give the example
+
+Server:
+
+```bash
+cd server && npm install && npm start
 ```
 
-And repeat
+Contracts:
 
+```bash
+npx truffle migrate
 ```
-until finished
-```
-
-End with an example of getting some data out of the system or using it for a little demo
-
 
 ## Authors
 
-* **Alex Matson** - [alexmat2on](https://github.com/alexmat2on)
-* **Kartikeya Sharma** - [sha256rma](https://github.com/sha256rma)
-* **Denny Liang** - [denny999222](https://github.com/denny999222)
-* **taehun lim** - [kevtae](https://github.com/kevtae)
-
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+Alex Matson ([alexmat2on](https://github.com/alexmat2on)),
+Kartikeya Sharma ([sha256rma](https://github.com/sha256rma)),
+Denny Liang ([denny999222](https://github.com/denny999222)),
+Taehun Lim ([kevtae](https://github.com/kevtae))
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-## Acknowledgments
-
-* Part of [NFTHACK hackathon](https://hack.ethglobal.co/showcase/ownft-rec5dwI2zHRi0RAss)
+MIT. See [LICENSE](LICENSE).
